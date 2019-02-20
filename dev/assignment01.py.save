@@ -1,0 +1,19 @@
+import socket
+
+def send_msg(socket,data):
+	total=0
+	while total <= len(d
+		sent = socket.send(data[total:])
+		total= total + sent
+	print("Sent %d bytes" % (total))
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+s.connect(("localhost",8888))
+
+data = "Morjesta boy"
+send_msg(s,data)
+
+print(s.recv(1024))
+
+s.close()
