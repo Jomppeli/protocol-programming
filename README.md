@@ -5,6 +5,9 @@ Protocol programming course
 <img src="https://img.shields.io/github/languages/top/jomppeli/protocol-programming.svg" /></a>
 <a href="https://github.com/Jomppeli/protocol-programming/issues" alt="Issues">
 <img src="https://img.shields.io/github/issues/jomppeli/protocol-programming.svg" /></a>
+<a href="https://github.com/Jomppeli/protocol-programming/issues" alt="Issues">
+<img src="https://img.shields.io/github/issues-closed/jomppeli/protocol-programming.svg" /></a>
+
 
 
 Spring 2019
