@@ -1,6 +1,4 @@
-# protocol-programming
-Protocol programming course
-
+# Protocol Programming
 <a href="https://github.com/Jomppeli/protocol-programming/search?l=python" alt="Languages">
 <img src="https://img.shields.io/github/languages/top/jomppeli/protocol-programming.svg" /></a>
 <a href="https://github.com/Jomppeli/protocol-programming/issues" alt="Issues">
