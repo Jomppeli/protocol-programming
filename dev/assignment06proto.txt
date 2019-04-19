@@ -1,0 +1,56 @@
+TODO list protocol specification
+
+This application uses three different request/response pairs. Client sends requests to the server side and the server responds to only these requests.
+
+The request and response messages has a same structure, and both contains a method field and a 
+parameter field. The method field contains the name of the request/response (e.g LIST) and the 
+parameter field contains the "body" of the message (e.g name of the task).  
+
+The TODO  list is stored in the server as a text file and the tasks are numbered and every task 
+is in its own row.
+
+Example:
+1) First
+2) Second
+3) Third
+
+If a task is removed, the server-side application rearranges the task numbers correctly. If a 
+task is added, the server-side application counts the existing tasks and numbers the new one 
+accordingly.
+
+The request/response pairs:
+1.
+Request: LIST
+Response: LISTR
+
+Requests the saved tasks from the server. The server sends the tasks as a parameter. Request 
+doesn't have parameters.
+
+Example:
+LIST\n
+LISTR\r\n1) eat 2) sleep\n
+
+2.
+Request: ADD
+Response: ADDR
+
+Adds a task to the TODO list. The name of the task is sent in the request parameter field. 
+Response parameter field has a success/error message depending if the task appending is 
+successful.
+
+Example:
+ADD\r\nName of the task\n
+ADDR\r\nTask <name> added to the list.\n
+
+3.
+Request: DONE
+Response: DONER
+
+Removes a task from the task list. Used to mark the task as done. The number of the task is sent 
+in the request parameter field. The response parameter field is used to send a success/error 
+message, depending if the task removal is successful or no.
+
+Example:
+DONE\r\n3\n
+DONER\r\nTask <name> removed.\n 
+
