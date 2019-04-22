@@ -1,6 +1,7 @@
 TODO list protocol specification
 
-This application uses three different request/response pairs. Client sends requests to the server side and the server responds to only these requests.
+This application uses three different request/response pairs. Client sends requests to the server side and the server 
+responds to only these requests. 
 
 The request and response messages has a same structure, and both contains a method field and a 
 parameter field. The method field contains the name of the request/response (e.g LIST) and the 
@@ -17,6 +18,7 @@ Example:
 If a task is removed, the server-side application rearranges the task numbers correctly. If a 
 task is added, the server-side application counts the existing tasks and numbers the new one 
 accordingly.
+
 
 The request/response pairs:
 1.

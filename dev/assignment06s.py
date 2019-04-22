@@ -16,23 +16,25 @@ def main():
         return(int(data_len))
 
     def read_data(socket,addr,serverFile):
-            msg = ''
-            addr = addr[0]
-            msg_len = recv_data_setup(socket)
+        # Go over the received data
+        msg = ''
+        addr = addr[0]
+        msg_len = recv_data_setup(socket)
 
-            recv_bytes = 0
-            while recv_bytes < msg_len:
-                    temp = client.recv(1024)
-                    temp = temp.decode('ascii')
-                    msg += temp
-                    recv_bytes += len(msg)
+        recv_bytes = 0
+        while recv_bytes < msg_len:
+                temp = client.recv(1024)
+                temp = temp.decode('ascii')
+                msg += temp
+                recv_bytes += len(msg)
 
-            requestHandler(msg,serverFile)
+        requestHandler(msg,serverFile)
             
     def data_setup(socket,data):
             data_len = len(data)
             send_data(socket, str(data_len)+'\n')
             send_data(socket,data)
+            # Print the response that has been sent
             print("RESPONSE: %s"% data)
 
     def send_data(socket,data):
@@ -46,77 +48,74 @@ def main():
         # Handle the request from the client. Split the message and handle it by the request method.
         
         msgSplit = msg.split("\n")
-        try:
-            clientRequest = msgSplit[0]
-            clientRequest = clientRequest.strip()
-            print(clientRequest)
-            # The request can be LIST, DONE, ADD
-            # The parameters are:
-            # LIST: none
-            # DONE: the number of the task (e.g 3)
-            # ADD: the name of the task (e.g "Buy a car")
-            
-            request1 = "LIST"
-            request2 = "DONE"
-            request3 = "ADD"
-            
-            if clientRequest == request1:
-                # LIST the TODO's from the file that was given as a command line argument
-                print("TODO's:")
-                f = open(serverFile,"r")
-                fileContent = f.read()
-                print(fileContent)
+        # The message structure is: REQUEST PARAMETER
+        clientRequest = msgSplit[0]
+        clientRequest = clientRequest.strip()
+        # The request can be LIST, DONE, ADD
+        # The parameters are:
+        # LIST: none
+        # DONE: the number of the task (e.g 3)
+        # ADD: the name of the task (e.g "Buy a car")
+        
+        request1 = "LIST"
+        request2 = "DONE"
+        request3 = "ADD"
+        
+        if clientRequest == request1:
+            # LIST the TODO's from the file that was given as a command line argument
+            # Send the data to the client as a LISTR response where the data is in the body
+            print("TODO's:")
+            f = open(serverFile,"r")
+            fileContent = f.read()
+            print(fileContent)
 
-                body = fileContent
-                data = "LISTR"+"\r\n"+body+"\n"
-                data_setup(sock,data)
-                
-            elif clientRequest == request2:
-                # Go over the todo's and if the clientParameter doesn't match, write the line to the new file
-                clientParameter = msgSplit[1]
-                f = open(serverFile, "r")
-                fileContent = f.readlines()
-                f1 = open(serverFile, "w")
-                print(clientParameter)
-                taskNumber = 1
-                for line in fileContent:
-                    split = line.split(")")
-                    if split[0] != clientParameter:
-                        line = "%d)%s" % (taskNumber,split[1])
-                        f1.write(line)
-                        print("Done")
-                        taskNumber += 1
-                
-                body = "Task deleted."
-                data = "DONER"+"\r\n"+body+"\n"
-                data_setup(sock,data)
-
-            elif clientRequest == request3:
-                # Take the task and add a number in front of it and append it to the file
-                clientParameter = msgSplit[1]
-                print(clientParameter)
-                f0 = open(serverFile, "r")
-                fileContent = f0.readlines()
-                f0.close()
-                taskNumber = 1
-                for line in fileContent:
+            body = fileContent
+            data = "LISTR"+"\r\n"+body+"\n"
+            data_setup(sock,data)
+            
+        elif clientRequest == request2:
+            # Go over the todo's and if the task number doesn't match the number that the client wants to be removed,
+            # write the task to the new file. So the task is not removed per say, it simply isn't just added to the newest version of the file.
+            clientParameter = msgSplit[1]
+            f = open(serverFile, "r")
+            fileContent = f.readlines()
+            f1 = open(serverFile, "w")
+            print(clientParameter)
+            taskNumber = 1
+            for line in fileContent:
+                split = line.split(")")
+                if split[0] != clientParameter:
+                    line = "%d)%s" % (taskNumber,split[1])
+                    f1.write(line)
                     taskNumber += 1
-                    print(taskNumber)
-                    print(line)
-                task = "\n%d) %s" % (taskNumber,clientParameter)
-                f1 = open(serverFile, "a")
-                f1.write(task)
-                f1.close()
-                body = "Task %s added!" % clientParameter
-                data = "ADDR"+"\r\n"+body+"\n"
-                data_setup(sock,data)
-            
 
+            # Send a success message to the client as a DONER response
             
+            body = "Task deleted."
+            data = "DONER"+"\r\n"+body+"\n"
+            data_setup(sock,data)
 
-        except IndexError:
-            # Not enough parameters
-            pass
+        elif clientRequest == request3:
+            # Take the task and add a number in front of it and append it to the file
+            # Go over the file and count the lines(tasks) and number the newest task accordingly
+            clientParameter = msgSplit[1]
+            print(clientParameter)
+            f0 = open(serverFile, "r")
+            fileContent = f0.readlines()
+            f0.close()
+            taskNumber = 1
+            for line in fileContent:
+                taskNumber += 1
+            task = "\n%d) %s" % (taskNumber,clientParameter)
+            f1 = open(serverFile, "a")
+            f1.write(task)
+            f1.close()
+
+            # Send a success messge to the client as a ADDR response
+            body = "Task %s added!" % clientParameter
+            data = "ADDR"+"\r\n"+body+"\n"
+            data_setup(sock,data)
+            
         
 
     def claHandler():
@@ -125,7 +124,7 @@ def main():
         # Checks that the port number has 4 digits
         # Checks that the given filename is a .txt file
         # If the extension is something else, exit the program
-        # If there is no given extension, try to add a .txt and see if any files exists
+        # If there is no given extension, try to add a .txt and see if any files exists. So it isn't necessary to put the .txt after the filename.
         # If the file doesn't exist, create it
         try:
             serverAddr = sys.argv[1]
@@ -160,27 +159,29 @@ def main():
 
             print(serverAddr, serverPort, serverFile)
 
+            # Try to open the file, if it doesn't exist, ask the user if he wants to create the file, or was it just a typo
             try:
                 f = open(serverFile, "r")
 
             except FileNotFoundError:
                 userInput = input("File not found. Create a file called %s? Y/N: " % serverFile)
                 if userInput == "y" or userInput == "Y":
-                    print("File created.")
                     f = open(serverFile, "w+")
+                    print("File created.")
                     
                     
                 elif userInput == "n" or userInput == "N":
-                    print("File not created. Try again.")
+                    print("File not created. Exiting.")
                     sys.exit()
             
         except IndexError:
-            print("Check the command line arguments and try again.")
+            print("Check the command line arguments and try again.\n\
+                python3 assignment06s.py <address> <port> <filename>")
             sys.exit()
 
         return(serverAddr,serverPort,serverFile)
             
-    
+    # Socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 

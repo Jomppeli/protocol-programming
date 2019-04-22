@@ -38,6 +38,9 @@ def read_data(s):
         responseHandler(msg)
 
 def responseHandler(msg):
+	# Handle the response accordingly depending on the method 
+	# Print the message body to the user
+
     try:
         msgs = msg.split("\n")
         method = msgs[0]
@@ -70,50 +73,53 @@ def exit_prog(si,f):
     
 
 try:
+	# Ask the user to give the server details (address and port)
+	# Show a "user interface" where the user can decide the actions
+	# Construct the request accordingly (METHOD PARAMETERS)
+	# Send the request to the server and listen to the response
         
-        signal.signal(signal.SIGINT, exit_prog)
-        #read_data(s)
-        while True:
-            s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            #serverAddr = input("Server address: ")
-            #serverPort = input("Server port: ")
-            serverAddr = "localhost"
-            serverPort = 8888
-            print(serverAddr,serverPort)
-            inp = input("1. LIST\n2. ADD\n3. MARK AS DONE\n4. CLOSE\n: ")
+    signal.signal(signal.SIGINT, exit_prog)
+    while True:
+        s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #serverAddr = input("Server address: ")
+        #serverPort = input("Server port: ")
+        serverAddr = "localhost"
+        serverPort = 8888
+        print(serverAddr,serverPort)
+        inp = input("1. LIST\n2. ADD\n3. MARK AS DONE\n4. CLOSE\n: ")
+        
+        if inp == "1"  or inp == 1:
+            s.connect((serverAddr,serverPort))
+            method = "LIST"
+            parameters = ""
+            data = method+"\r\n"+parameters+"\n"
+            data_setup(s,data)
+            read_data(s)
+            s.close()
+
+        elif inp == "2" or inp == 2:
+            parameters = input("Name of the task: ")
+            s.connect((serverAddr, serverPort))
+            method = "ADD"
+            data = method+"\r\n"+parameters+"\n"
+            data_setup(s,data)
+            read_data(s)
+            s.close()
+
+        elif inp == "3" or inp == 3:
+            parameters = input("Number of the task: ")
+            s.connect((serverAddr, serverPort))
+            method = "DONE"
+            data = method+"\r\n"+str(parameters)+"\n"
+            data_setup(s,data)
+            read_data(s)
+            s.close()
             
-            if inp == "1":
-                s.connect((serverAddr,serverPort))
-                method = "LIST"
-                parameters = ""
-                data = method+"\r\n"+parameters+"\n"
-                data_setup(s,data)
-                read_data(s)
-                s.close()
+        elif inp == "4" or inp == 4:
+            break
 
-            elif inp == "2":
-                parameters = input("Name of the task: ")
-                s.connect((serverAddr, serverPort))
-                method = "ADD"
-                data = method+"\r\n"+parameters+"\n"
-                data_setup(s,data)
-                read_data(s)
-                s.close()
-
-            elif inp == "3":
-                parameters = input("Number of the task: ")
-                s.connect((serverAddr, serverPort))
-                method = "DONE"
-                data = method+"\r\n"+str(parameters)+"\n"
-                data_setup(s,data)
-                read_data(s)
-                s.close()
-                
-            elif inp == "4":
-                break
-              
 except ConnectionRefusedError:
-        print("Server is not receiving connections.")
+    print("Server is not receiving connections.")
 
 except ConnectionResetError:
     print("Server is not receiving connections.")
